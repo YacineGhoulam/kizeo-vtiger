@@ -63,19 +63,24 @@ const getLastAccount = (items, listId) => {
 		.login()
 		.then(() =>
 			connection.query(
-				"SELECT account_no, accountname, bill_city, bill_code, bill_street   FROM Accounts ORDER BY createdtime DESC LIMIT 1;"
+				"SELECT account_no, accountname, bill_city, bill_code, bill_street FROM Accounts ORDER BY createdtime DESC LIMIT 1;"
 			)
 		)
 		.then((account) => {
-			account = account.results[0];
-			console.log(account);
+			({
+				account_no,
+				accountname,
+				bill_city,
+				bill_code,
+				bill_street,
+			} = account[0]);
+			let itemString = `${account_no}|${accountname}|${bill_city}|${bill_code}|${bill_street}`;
+			items = items.unshift(itemString);
+			addAccount(items, listId);
 		});
 };
 
 const addAccount = (items, listId) => {
-	const item = "007|Oran|Hai Yasmine|315510|Bir el Djir";
-
-	items.push(item);
 	const options = {
 		url: `${API_URL}/lists/${listId}`,
 		headers: API_HEADER,
