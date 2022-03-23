@@ -99,11 +99,11 @@ const addAccount = (items, listId) => {
 	request.put(options, callback);
 };
 
-app.get("/", (req, res) => {
+app.get("/kizeo", (req, res) => {
 	res.send("<h1>Hello Bebe</h1>");
 });
 
-app.post("/addAccount", (req, res) => {
+app.post("/kizeo/addAccount", (req, res) => {
 	getAllLists();
 	res.sendStatus(200);
 });
