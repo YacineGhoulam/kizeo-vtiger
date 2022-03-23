@@ -82,7 +82,7 @@ const getLastAccount = (items, listId) => {
 
 const addAccount = (items, listId) => {
 	console.log("ITEMS: " + items);
-	console.log("listId: " + listId);
+	console.log("LIST ID: " + listId);
 	const options = {
 		url: `${API_URL}/lists/${listId}`,
 		headers: API_HEADER,
