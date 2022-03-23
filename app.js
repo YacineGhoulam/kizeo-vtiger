@@ -79,10 +79,12 @@ const addAccount = (items, listId) => {
 };
 
 app.get("/", (req, res) => {
-	getAllLists();
 	res.send("<h1>Hello Bebe</h1>");
 });
 
+app.post("/addAccount", (req, res) => {
+	getAllLists();
+});
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {
