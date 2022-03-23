@@ -75,7 +75,7 @@ const getLastAccount = (items, listId) => {
 				bill_street,
 			} = account[0]);
 			let itemString = `${account_no}|${accountname}|${bill_city}|${bill_code}|${bill_street}`;
-			items = items.unshift(itemString);
+			items.unshift(itemString);
 			addAccount(items, listId);
 		});
 };
