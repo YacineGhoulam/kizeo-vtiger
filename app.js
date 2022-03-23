@@ -50,7 +50,7 @@ const getAllAccounts = (listId) => {
 		if (!error) {
 			body = JSON.parse(body);
 			let items = body.list.items;
-			addAccount(items, listId);
+			getLastAccount(items, listId);
 		} else {
 			console.log(error);
 		}
@@ -58,10 +58,24 @@ const getAllAccounts = (listId) => {
 	request(options, callback);
 };
 
+const getLastAccount = (items, listId) => {
+	connection
+		.login()
+		.then(() =>
+			connection.query(
+				"SELECT account_no, accountname, bill_city, bill_code, bill_street   FROM Accounts ORDER BY createdtime DESC LIMIT 1;"
+			)
+		)
+		.then((account) => {
+			account = account.results[0];
+			console.log(account);
+		});
+};
+
 const addAccount = (items, listId) => {
 	const item = "007|Oran|Hai Yasmine|315510|Bir el Djir";
-	items.push(item);
 
+	items.push(item);
 	const options = {
 		url: `${API_URL}/lists/${listId}`,
 		headers: API_HEADER,
