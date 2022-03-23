@@ -102,7 +102,7 @@ app.get("/", (req, res) => {
 });
 
 app.post("/addAccount", (req, res) => {
-	getAllLists();
+	//getAllLists();
 	res.sendStatus(200);
 });
 const PORT = process.env.PORT || 3000;
