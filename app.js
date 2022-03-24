@@ -78,10 +78,10 @@ const getLastAccount = (items, listId) => {
 
 			// If Item exists, remove it (modification)
 			console.log(items);
-			console.log("first items: " + items.lenght);
+			console.log("first items: " + items.length);
 			items = items.filter((item) => !item.includes(account_no));
 			console.log("account_no: " + account_no);
-			console.log("second items: " + items.lenght);
+			console.log("second items: " + items.length);
 			//items.unshift(itemString);
 			//addAccount(items, listId);
 		});
