@@ -67,19 +67,21 @@ const getLastAccount = (items, listId) => {
 			)
 		)
 		.then((account) => {
-			({
-				account_no,
-				accountname,
-				bill_city,
-				bill_code,
-				bill_street,
-			} = account[0]);
+			let(
+				({
+					account_no,
+					accountname,
+					bill_city,
+					bill_code,
+					bill_street,
+				} = account[0])
+			);
 			let itemString = `${account_no}|${accountname}|${bill_city}|${bill_code}|${bill_street}`;
 
 			// If Item exists, remove it (modification)
 			items = items.filter((item) => !item.includes(account_no));
-			let test = items.filter((item) => item.includes("CAC021737"));
-			console.log(typeof account_no);
+			console.log("account_no: " + account_no);
+			console.log("items: " + items);
 			items.unshift(itemString);
 			addAccount(items, listId);
 		});
