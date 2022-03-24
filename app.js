@@ -98,7 +98,6 @@ const addAccount = (items, listId) => {
 		if (err) {
 			console.log(err);
 		}
-		console.log(body);
 	}
 	request.put(options, callback);
 };
