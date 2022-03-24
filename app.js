@@ -107,7 +107,7 @@ app.get("/kizeo", (req, res) => {
 });
 
 app.post("/kizeo/addAccount", (req, res) => {
-	console.log(req);
+	console.log(req.body[0].id);
 	getAllLists();
 	res.sendStatus(200);
 });
