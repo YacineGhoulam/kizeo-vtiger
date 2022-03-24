@@ -63,7 +63,7 @@ const getLastAccount = (items, listId, recordId) => {
 		.login()
 		.then(() =>
 			connection.query(
-				"SELECT account_no, accountname, bill_city, bill_code, bill_street   FROM Accounts WHERE id='" +
+				"SELECT account_no, accountname, bill_city, bill_code, bill_street, email1 FROM Accounts WHERE id='" +
 					recordId +
 					"';"
 			)
@@ -75,8 +75,9 @@ const getLastAccount = (items, listId, recordId) => {
 				bill_city,
 				bill_code,
 				bill_street,
+				email1,
 			} = account[0];
-			let itemString = `${account_no}|${accountname}|${bill_city}|${bill_code}|${bill_street}`;
+			let itemString = `${account_no}|${accountname}|${bill_city}|${bill_code}|${bill_street}|${email1}`;
 
 			// If Item exists, remove it (modification)
 			items = items.filter((item) => !item.includes(account_no));
