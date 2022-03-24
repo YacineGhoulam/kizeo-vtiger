@@ -67,15 +67,13 @@ const getLastAccount = (items, listId) => {
 			)
 		)
 		.then((account) => {
-			let(
-				({
-					account_no,
-					accountname,
-					bill_city,
-					bill_code,
-					bill_street,
-				} = account[0])
-			);
+			let {
+				account_no,
+				accountname,
+				bill_city,
+				bill_code,
+				bill_street,
+			} = account[0];
 			let itemString = `${account_no}|${accountname}|${bill_city}|${bill_code}|${bill_street}`;
 
 			// If Item exists, remove it (modification)
