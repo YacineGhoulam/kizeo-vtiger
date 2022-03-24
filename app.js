@@ -18,7 +18,7 @@ const API_HEADER = {
 	Authorization: API_TOKEN,
 };
 
-const getAllLists = () => {
+const getAllLists = (recordId) => {
 	const options = {
 		url: `${API_URL}/lists`,
 		headers: API_HEADER,
@@ -27,7 +27,7 @@ const getAllLists = () => {
 	function callback(error, response, body) {
 		if (!error && response.statusCode == 200) {
 			body = JSON.parse(body);
-			getAccountsListId(body.lists);
+			getAccountsListId(body.lists, recordId);
 		} else {
 			console.log("getAllLists => oops");
 		}
@@ -35,13 +35,13 @@ const getAllLists = () => {
 	request(options, callback);
 };
 
-const getAccountsListId = (lists) => {
+const getAccountsListId = (lists, recordId) => {
 	lists = lists.filter((list) => list.name === "Accounts");
 	const listId = lists[0].id;
-	getAllAccounts(listId);
+	getAllAccounts(listId, recordId);
 };
 
-const getAllAccounts = (listId) => {
+const getAllAccounts = (listId, recordId) => {
 	const options = {
 		url: `${API_URL}/lists/${listId}/complete`,
 		headers: API_HEADER,
@@ -50,7 +50,7 @@ const getAllAccounts = (listId) => {
 		if (!error) {
 			body = JSON.parse(body);
 			let items = body.list.items;
-			getLastAccount(items, listId);
+			getLastAccount(items, listId, recordId);
 		} else {
 			console.log(error);
 		}
@@ -58,15 +58,18 @@ const getAllAccounts = (listId) => {
 	request(options, callback);
 };
 
-const getLastAccount = (items, listId) => {
+const getLastAccount = (items, listId, recordId) => {
 	connection
 		.login()
 		.then(() =>
 			connection.query(
-				"SELECT account_no, accountname, bill_city, bill_code, bill_street FROM Accounts ORDER BY modifiedtime DESC LIMIT 1;"
+				"SELECT account_no, accountname, bill_city, bill_code, bill_street   FROM Accounts WHERE id='" +
+					recordId +
+					"';"
 			)
 		)
 		.then((account) => {
+			console.log("Account: " + account);
 			let {
 				account_no,
 				accountname,
@@ -107,8 +110,8 @@ app.get("/kizeo", (req, res) => {
 });
 
 app.post("/kizeo/addAccount", (req, res) => {
-	console.log(req.body[0]);
-	getAllLists();
+	let id = req.body[0].id;
+	getAllLists(id);
 	res.sendStatus(200);
 });
 const PORT = process.env.PORT || 5001;
