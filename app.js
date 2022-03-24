@@ -78,7 +78,7 @@ const getLastAccount = (items, listId) => {
 
 			// If Item exists, remove it (modification)
 			items = items.filter((item) => !item.startsWith(account_no));
-			let items = items.filter((item) =>
+			let test = items.filter((item) =>
 				item.startsWith(account_no)
 			);
 			console.log(test + "xxxxxxx" + account_no);
