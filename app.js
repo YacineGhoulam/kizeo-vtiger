@@ -77,10 +77,8 @@ const getLastAccount = (items, listId) => {
 			let itemString = `${account_no}|${accountname}|${bill_city}|${bill_code}|${bill_street}`;
 
 			// If Item exists, remove it (modification)
-			items = items.filter((item) => !item.startsWith(account_no));
-			let test = items.filter((item) =>
-				item.startsWith(account_no)
-			);
+			items = items.filter((item) => !item.includes(account_no));
+			let test = items.filter((item) => item.includes(account_no));
 			console.log(test + "xxxxxxx" + account_no);
 			items.unshift(itemString);
 			addAccount(items, listId);
