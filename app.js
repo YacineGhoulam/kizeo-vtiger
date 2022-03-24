@@ -69,7 +69,6 @@ const getLastAccount = (items, listId, recordId) => {
 			)
 		)
 		.then((account) => {
-			console.log("Account: " + account);
 			let {
 				account_no,
 				accountname,
@@ -80,12 +79,10 @@ const getLastAccount = (items, listId, recordId) => {
 			let itemString = `${account_no}|${accountname}|${bill_city}|${bill_code}|${bill_street}`;
 
 			// If Item exists, remove it (modification)
-			console.log("first items: " + items.length);
 			items = items.filter((item) => !item.includes(account_no));
-			console.log("account_no: " + account_no);
-			console.log("second items: " + items.length);
 			items.unshift(itemString);
 			addAccount(items, listId);
+			console.log("Kizeo Add Account");
 		});
 };
 
@@ -110,8 +107,10 @@ app.get("/kizeo", (req, res) => {
 });
 
 app.post("/kizeo/addAccount", (req, res) => {
-	let id = req.body[0].id;
-	getAllLists(id);
+	if (req.body[0].id) {
+		let id = req.body[0].id;
+		getAllLists(id);
+	}
 	res.sendStatus(200);
 });
 const PORT = process.env.PORT || 5001;
