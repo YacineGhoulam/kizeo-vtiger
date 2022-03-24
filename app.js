@@ -78,7 +78,7 @@ const getLastAccount = (items, listId) => {
 
 			// If Item exists, remove it (modification)
 			items = items.filter((item) => !item.includes(account_no));
-			let test = items.filter((item) => item.includes(account_no));
+			let test = items.filter((item) => item.includes("CAC021737"));
 			console.log(test + "xxxxxxx" + account_no);
 			items.unshift(itemString);
 			addAccount(items, listId);
