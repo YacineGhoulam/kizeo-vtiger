@@ -63,7 +63,7 @@ const getLastAccount = (items, listId) => {
 		.login()
 		.then(() =>
 			connection.query(
-				"SELECT account_no, accountname, bill_city, bill_code, bill_street FROM Accounts ORDER BY createdtime DESC LIMIT 1;"
+				"SELECT account_no, accountname, bill_city, bill_code, bill_street FROM Accounts ORDER BY modifiedtime DESC LIMIT 1;"
 			)
 		)
 		.then((account) => {
@@ -78,14 +78,15 @@ const getLastAccount = (items, listId) => {
 
 			// If Item exists, remove it (modification)
 			items = items.filter((item) => !item.startsWith(account_no));
+			console.log(items[0] + "xxxxxx" + account_no);
 			items.unshift(itemString);
 			addAccount(items, listId);
 		});
 };
 
 const addAccount = (items, listId) => {
-	console.log("ITEMS: " + items);
-	console.log("LIST ID: " + listId);
+	//console.log("ITEMS: " + items);
+	//console.log("LIST ID: " + listId);
 	const options = {
 		url: `${API_URL}/lists/${listId}`,
 		headers: API_HEADER,
