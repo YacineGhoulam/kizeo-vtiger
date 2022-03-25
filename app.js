@@ -50,7 +50,6 @@ const getAllLists = (recordId, recordType) => {
 };
 
 const getListId = (lists, recordId, recordType) => {
-	console.log("getListId: " + recordType);
 	lists = lists.filter((list) => list.name === recordType);
 	const listId = lists[0].id;
 	getAllRecords(listId, recordId, recordType);
@@ -65,7 +64,6 @@ const getAllRecords = (listId, recordId, recordType) => {
 		if (!error) {
 			body = JSON.parse(body);
 			let items = body.list.items;
-			console.log(recordType);
 			if (recordType === "Accounts")
 				getLastAccount(items, listId, recordId);
 			if (recordType === "Assets")
