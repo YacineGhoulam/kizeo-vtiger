@@ -146,7 +146,8 @@ app.get("/kizeo", (req, res) => {
 });
 
 app.post("/kizeo/addAccount", (req, res) => {
-	console.log(req.body);
+	console.log(typeof req.body);
+	console.log(req.body[0]);
 	if (req.body[0].id) {
 		let id = req.body[0].id;
 		getAllLists(id);
