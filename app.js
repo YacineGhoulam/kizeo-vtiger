@@ -18,7 +18,20 @@ const API_HEADER = {
 	Authorization: API_TOKEN,
 };
 
-const getAllLists = (recordId) => {
+/* CREATING NEW CASES FOR EACH FORM
+	Every 10min we:
+	1- Get a list from Kizeo of filled forms in last 10min
+	2- Extract 
+*/
+
+/* UPDATING KIZEO LIST
+	1- Receive request with Id of updated/created Record.
+	2- Get All Lists from Kizeo and extract Record list Id.
+	3- Extract all records currently in Kizeo list.
+	4- Get the updated/created Record information and add it to the list.
+*/
+
+const getAllLists = (recordId, recordType) => {
 	const options = {
 		url: `${API_URL}/lists`,
 		headers: API_HEADER,
@@ -27,7 +40,7 @@ const getAllLists = (recordId) => {
 	function callback(error, response, body) {
 		if (!error && response.statusCode == 200) {
 			body = JSON.parse(body);
-			getAccountsListId(body.lists, recordId);
+			getListId(body.lists, recordId, recordType);
 		} else {
 			console.log("getAllLists => oops");
 		}
@@ -35,13 +48,13 @@ const getAllLists = (recordId) => {
 	request(options, callback);
 };
 
-const getAccountsListId = (lists, recordId) => {
-	lists = lists.filter((list) => list.name === "Accounts");
+const getListId = (lists, recordId, recordType) => {
+	lists = lists.filter((list) => list.name === recordType);
 	const listId = lists[0].id;
-	getAllAccounts(listId, recordId);
+	getAllRecords(listId, recordId, recordType);
 };
 
-const getAllAccounts = (listId, recordId) => {
+const getAllRecords = (listId, recordId, recordType) => {
 	const options = {
 		url: `${API_URL}/lists/${listId}/complete`,
 		headers: API_HEADER,
@@ -50,7 +63,10 @@ const getAllAccounts = (listId, recordId) => {
 		if (!error) {
 			body = JSON.parse(body);
 			let items = body.list.items;
-			getLastAccount(items, listId, recordId);
+			if (recordType === "Accounts")
+				getLastAccount(items, listId, recordId);
+			if (recordType === "Assets")
+				getLastAsset(items, listId, recordId);
 		} else {
 			console.log(error);
 		}
@@ -82,12 +98,34 @@ const getLastAccount = (items, listId, recordId) => {
 			// If Item exists, remove it (modification)
 			items = items.filter((item) => !item.includes(account_no));
 			items.unshift(itemString);
-			addAccount(items, listId);
+			addRecord(items, listId);
 			console.log("Kizeo Add Account");
 		});
 };
 
-const addAccount = (items, listId) => {
+const getLastAsset = (items, listId, recordId) => {
+	connection
+		.login()
+		.then(() =>
+			connection.query(
+				"SELECT assetname, serialnumber FROM Assets WHERE id='" +
+					recordId +
+					"';"
+			)
+		)
+		.then((asset) => {
+			let { assetname, serialnumber } = asset[0];
+			let itemString = `${assetname}|${serialnumber}`;
+
+			// If Item exists, remove it (modification)
+			items = items.filter((item) => !item.includes(assetname));
+			items.unshift(itemString);
+			addRecord(items, listId);
+			console.log("Kizeo Add Asset");
+		});
+};
+
+const addRecord = (items, listId) => {
 	const options = {
 		url: `${API_URL}/lists/${listId}`,
 		headers: API_HEADER,
@@ -114,6 +152,15 @@ app.post("/kizeo/addAccount", (req, res) => {
 	}
 	res.sendStatus(200);
 });
+
+app.post("/kizeo/addAsset", (req, res) => {
+	if (req.body[0].id) {
+		let id = req.body[0].id;
+		getAllLists("Assets", id);
+	}
+	res.sendStatus(200);
+});
+
 const PORT = process.env.PORT || 5001;
 
 app.listen(PORT, () => {
