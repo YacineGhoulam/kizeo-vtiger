@@ -94,7 +94,7 @@ const getLastAccount = (items, listId, recordId) => {
 				bill_street,
 				email1,
 			} = account[0];
-			let itemString = `${account_no}|${accountname}|${bill_city}|${bill_code}|${bill_street}|${email1}`;
+			let itemString = `${accountname}|${account_no}|${bill_city}|${bill_code}|${bill_street}|${email1}`;
 
 			// If Item exists, remove it (modification)
 			items = items.filter((item) => !item.includes(account_no));
