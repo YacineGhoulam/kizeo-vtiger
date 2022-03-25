@@ -63,6 +63,7 @@ const getAllRecords = (listId, recordId, recordType) => {
 		if (!error) {
 			body = JSON.parse(body);
 			let items = body.list.items;
+			console.log(recordType);
 			if (recordType === "Accounts")
 				getLastAccount(items, listId, recordId);
 			if (recordType === "Assets")
