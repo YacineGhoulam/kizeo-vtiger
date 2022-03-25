@@ -146,10 +146,9 @@ app.get("/kizeo", (req, res) => {
 });
 
 app.post("/kizeo/addAccount", (req, res) => {
-	console.log(req.body[0].id);
 	if (req.body[0].id) {
 		let id = req.body[0].id;
-		getAllLists(id);
+		getAllLists(id, "Accounts");
 	}
 	res.sendStatus(200);
 });
@@ -157,7 +156,7 @@ app.post("/kizeo/addAccount", (req, res) => {
 app.post("/kizeo/addAsset", (req, res) => {
 	if (req.body[0].id) {
 		let id = req.body[0].id;
-		getAllLists("Assets", id);
+		getAllLists(id, "Assets");
 	}
 	res.sendStatus(200);
 });
