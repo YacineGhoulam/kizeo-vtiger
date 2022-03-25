@@ -40,6 +40,7 @@ const getAllLists = (recordId, recordType) => {
 	function callback(error, response, body) {
 		if (!error && response.statusCode == 200) {
 			body = JSON.parse(body);
+			console.log("getAllLists: " + recordType);
 			getListId(body.lists, recordId, recordType);
 		} else {
 			console.log("getAllLists => oops");
@@ -49,6 +50,7 @@ const getAllLists = (recordId, recordType) => {
 };
 
 const getListId = (lists, recordId, recordType) => {
+	console.log("getListId: " + recordType);
 	lists = lists.filter((list) => list.name === recordType);
 	const listId = lists[0].id;
 	getAllRecords(listId, recordId, recordType);
