@@ -23,6 +23,58 @@ const API_HEADER = {
 	1- Get a list from Kizeo of filled forms in last 10min
 	2- Extract 
 */
+const fiveMinutes = 5000;
+
+const AddProductToClient = (formId = 782857) => {
+	const options = {
+		url: `${API_URL}/forms/${formId}/data/all`,
+		headers: API_HEADER,
+	};
+
+	function callback(error, response, body) {
+		if (!error && response.statusCode == 200) {
+			body = JSON.parse(body);
+			const allResponses = body.data;
+			const recentResponses = allResponses.filter((response) => {
+				let currentDate = new Date().getTime();
+				let responseDate = new Date(
+					response.create_time
+				).getTime();
+				return (
+					currentDate - responseDate <
+					1000 * 60 * 60 * 24 * 5
+				); // 5 days
+			});
+			recentResponses.forEach((response) => {
+				let responseId = response.id;
+				getFormResponse(formId, responseId);
+			});
+		} else {
+			console.log(error);
+		}
+	}
+	request(options, callback);
+};
+
+const getFormResponse = (formId, responseId) => {
+	const options = {
+		url: `${API_URL}/forms/${formId}/data/${responseId}`,
+		headers: API_HEADER,
+	};
+
+	function callback(error, response, body) {
+		if (!error && response.statusCode == 200) {
+			body = JSON.parse(body);
+			let listeMateriel = body.data.fields.liste_du_materiel.value;
+			console.log(listeMateriel[1]);
+		} else {
+			console.log(error);
+		}
+	}
+	request(options, callback);
+};
+
+setInterval(AddProductToClient, fiveMinutes);
 
 /* UPDATING KIZEO LIST
 	1- Receive request with Id of updated/created Record.
@@ -66,8 +118,8 @@ const getAllRecords = (listId, recordId, recordType) => {
 			let items = body.list.items;
 			if (recordType === "Accounts")
 				getLastAccount(items, listId, recordId);
-			if (recordType === "Assets")
-				getLastAsset(items, listId, recordId);
+			if (recordType === "Products")
+				getLastProduct(items, listId, recordId);
 		} else {
 			console.log(error);
 		}
@@ -104,25 +156,25 @@ const getLastAccount = (items, listId, recordId) => {
 		});
 };
 
-const getLastAsset = (items, listId, recordId) => {
+const getLastProduct = (items, listId, recordId) => {
 	connection
 		.login()
 		.then(() =>
 			connection.query(
-				"SELECT assetname, serialnumber FROM Assets WHERE id='" +
+				"SELECT productname, productcode FROM Products WHERE discontinued = 1 AND id='" +
 					recordId +
 					"';"
 			)
 		)
-		.then((asset) => {
-			let { assetname, serialnumber } = asset[0];
-			let itemString = `${assetname}|${serialnumber}`;
+		.then((product) => {
+			let { productname, productcode } = product[0];
+			let itemString = `${productname}|${productcode}`;
 
 			// If Item exists, remove it (modification)
-			items = items.filter((item) => !item.includes(assetname));
+			items = items.filter((item) => !item.includes(productname));
 			items.unshift(itemString);
 			addRecord(items, listId);
-			console.log("Kizeo Add Asset");
+			console.log("Kizeo Add Product");
 		});
 };
 
@@ -154,10 +206,10 @@ app.post("/kizeo/addAccount", (req, res) => {
 	res.sendStatus(200);
 });
 
-app.post("/kizeo/addAsset", (req, res) => {
+app.post("/kizeo/addProduct", (req, res) => {
 	if (req.body[0].id) {
 		let id = req.body[0].id;
-		getAllLists(id, "Assets");
+		getAllLists(id, "Products");
 	}
 	res.sendStatus(200);
 });
