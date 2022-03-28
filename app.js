@@ -74,7 +74,7 @@ const getFormResponse = (formId, responseId) => {
 	request(options, callback);
 };
 
-setInterval(AddProductToClient, fiveMinutes);
+//setInterval(AddProductToClient, fiveMinutes);
 
 /* UPDATING KIZEO LIST
 	1- Receive request with Id of updated/created Record.
