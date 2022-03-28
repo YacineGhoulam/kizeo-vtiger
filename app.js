@@ -167,7 +167,7 @@ const getLastProduct = (items, listId, recordId) => {
 			)
 		)
 		.then((product) => {
-			console.log(product);
+			console.log(recordId);
 			let { productname, productcode } = product[0];
 			let itemString = `${productname}|${productcode}`;
 
