@@ -130,6 +130,7 @@ const setAccountComment = (responseData, accountId) => {
 			comment
 		)}`;
 
+	console.log(url);
 	axios.post(url, {}, vtigerHeader).then((response) =>
 		console.log(JSON.stringify(commentcomment))
 	);
