@@ -132,7 +132,10 @@ const setAccountComment = (responseData, accountId) => {
 	);
 
 	axios.post(url, {}, vtigerHeader).then((response) =>
-		console.log(response.data)
+		console.log(
+			"Kizeo Comment has been Added. " +
+				response.data.result.commentcontent
+		)
 	);
 };
 
