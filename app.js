@@ -124,15 +124,15 @@ const setAccountComment = (responseData, accountId) => {
 		assigned_user_id: "19x141",
 		related_to: accountId,
 	};
-	let url =
+	let url = encodeURI(
 		vtigerBaseUrl +
-		`/create?elementType=ModComments&element=${JSON.stringify(
-			comment
-		)}`;
+			`/create?elementType=ModComments&element=${JSON.stringify(
+				comment
+			)}`
+	);
 
-	console.log(url);
 	axios.post(url, {}, vtigerHeader).then((response) =>
-		console.log(JSON.stringify(commentcomment))
+		console.log(response.data)
 	);
 };
 

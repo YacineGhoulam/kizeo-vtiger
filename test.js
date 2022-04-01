@@ -15,6 +15,14 @@ const vtigerHeader = {
 		password: "Kn5kbakmLT3UDZWE",
 	},
 };
+const header = {
+	method: "GET",
+	headers: {
+		Authorization:
+			"Basic eWFjaW5lQGRpZ2ltaXVtLmZyOktuNWtiYWttTFQzVURaV0U=",
+	},
+};
+
 let id = "19x141";
 const asset = {
 	product: "6x1959",
@@ -28,16 +36,25 @@ const asset = {
 	cf_assets_nfacturefournisseur: "xxxxx", //??
 };
 const comment = {
-	commentcontent: "toot",
+	commentcontent: "poopééé",
 	assigned_user_id: "19x141",
 	related_to: "3x1206193",
 };
-let url = `https://digimium2.od2.vtiger.com/restapi/v1/vtiger/default/create?elementType=ModComments&element=${JSON.stringify(
+
+let uri = `https://digimium2.od2.vtiger.com/restapi/v1/vtiger/default/create?elementType=ModComments&element=${JSON.stringify(
 	comment
 )}`;
 
-axios.post(url, {}, vtigerHeader).then((response) =>
-	console.log("response.data")
-);
+let clientServerOptions = {
+	uri: encodeURI(uri),
+	method: "POST",
+	headers: {
+		Authorization:
+			"Basic eWFjaW5lQGRpZ2ltaXVtLmZyOktuNWtiYWttTFQzVURaV0U=",
+	},
+};
+request(clientServerOptions, function (error, response, body) {
+	console.log(body);
+});
 
 app.use(bodyParser.json());
