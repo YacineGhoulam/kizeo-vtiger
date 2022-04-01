@@ -2,6 +2,8 @@ const app = require("express")();
 const CRM = require("vtiger");
 const request = require("request");
 const bodyParser = require("body-parser");
+const axios = require("axios");
+const fs = require("fs");
 
 app.use(bodyParser.json());
 
@@ -10,6 +12,15 @@ let connection = new CRM.Connection(
 	"yacine@digimium.fr",
 	"Kn5kbakmLT3UDZWE"
 );
+const vtigerBaseUrl =
+	"https://digimium2.od2.vtiger.com/restapi/v1/vtiger/default";
+
+const vtigerHeader = {
+	auth: {
+		username: "yacine@digimium.fr",
+		password: "Kn5kbakmLT3UDZWE",
+	},
+};
 
 const API_URL = "https://www.kizeoforms.com/rest/v3";
 const API_TOKEN =
@@ -18,14 +29,23 @@ const API_HEADER = {
 	Authorization: API_TOKEN,
 };
 
+const writeQuerry = (productList) => {
+	let query = "SELECT id FROM Products WHERE ";
+	productList.forEach((product, idx) => {
+		query += `productcode='${product.product}' `;
+		if (idx < productList.length - 1) query += " OR ";
+	});
+	return query + ";";
+};
+
 /* CREATING NEW CASES FOR EACH FORM
 	Every 10min we:
 	1- Get a list from Kizeo of filled forms in last 10min
 	2- Extract 
 */
-const fiveMinutes = 5000;
+const CommentTimeInterval = 1000 * 60 * 10; // 10 minutes
 
-const AddProductToClient = (formId = 782857) => {
+const AddCommentToAccount = (formId = 782857) => {
 	const options = {
 		url: `${API_URL}/forms/${formId}/data/all`,
 		headers: API_HEADER,
@@ -35,20 +55,18 @@ const AddProductToClient = (formId = 782857) => {
 		if (!error && response.statusCode == 200) {
 			body = JSON.parse(body);
 			const allResponses = body.data;
-			const recentResponses = allResponses.filter((response) => {
+			let recentResponses = allResponses.filter((response) => {
 				let currentDate = new Date().getTime();
 				let responseDate = new Date(
 					response.create_time
 				).getTime();
-				return (
-					currentDate - responseDate <
-					1000 * 60 * 60 * 24 * 5
-				); // 5 days
+				return currentDate - responseDate < CommentTimeInterval;
 			});
-			recentResponses.forEach((response) => {
-				let responseId = response.id;
-				getFormResponse(formId, responseId);
-			});
+
+			// TREAT EVERY RESPONSE
+			recentResponses.forEach((response) =>
+				getResponseData(response)
+			);
 		} else {
 			console.log(error);
 		}
@@ -56,7 +74,69 @@ const AddProductToClient = (formId = 782857) => {
 	request(options, callback);
 };
 
-const getFormResponse = (formId, responseId) => {
+const getResponseData = (response) => {
+	let { form_id, id } = response;
+	const options = {
+		url: `${API_URL}/forms/${form_id}/data/${id}`,
+		headers: API_HEADER,
+	};
+
+	function callback(error, response, body) {
+		if (!error && response.statusCode == 200) {
+			body = JSON.parse(body);
+			let responseData = body.data.fields;
+			getAccountId(responseData);
+		} else {
+			console.log(error);
+		}
+	}
+	request(options, callback);
+};
+
+const getAccountId = (responseData) => {
+	let account_no = responseData.n_compte_client_dgm1.value;
+	let url =
+		vtigerBaseUrl +
+		`/query?query=SELECT id FROM Accounts WHERE account_no='${account_no}';`;
+	axios.get(url, vtigerHeader).then((response) => {
+		let accountId = response.data.result[0].id;
+		setAccountComment(responseData, accountId);
+	});
+};
+
+const setAccountComment = (responseData, accountId) => {
+	let {
+		personne_presente_sur_site_firstname,
+		personne_presente_sur_site_lastname,
+		date_debut_d_intervention,
+		heure_debut_intervention,
+		type_d_intervention,
+		lieu_d_intervention_address,
+		adresse,
+	} = responseData;
+	adresse = lieu_d_intervention_address.value
+		? lieu_d_intervention_address.value
+		: adresse.value;
+
+	const commentcontent = `Une intervention ${type_d_intervention.value} a été réalisée par ${personne_presente_sur_site_firstname.value} ${personne_presente_sur_site_lastname.value} le ${date_debut_d_intervention.value} à ${heure_debut_intervention.value} sur le site ${adresse}`;
+	const comment = {
+		commentcontent: commentcontent,
+		assigned_user_id: "19x141",
+		related_to: accountId,
+	};
+	let url =
+		vtigerBaseUrl +
+		`/create?elementType=ModComments&element=${JSON.stringify(
+			comment
+		)}`;
+
+	axios.post(url, {}, vtigerHeader).then((response) =>
+		console.log(JSON.stringify(commentcomment))
+	);
+};
+
+// USELESSSSSSSSSSSSSSSSSSSSSSSSSS
+const getFormProducts = (formId, responseId) => {
 	const options = {
 		url: `${API_URL}/forms/${formId}/data/${responseId}`,
 		headers: API_HEADER,
@@ -65,8 +145,31 @@ const getFormResponse = (formId, responseId) => {
 	function callback(error, response, body) {
 		if (!error && response.statusCode == 200) {
 			body = JSON.parse(body);
-			let listeMateriel = body.data.fields.liste_du_materiel.value;
-			console.log(listeMateriel[1]);
+
+			//Extract info from form
+			const {
+				date_debut_d_intervention,
+				n_compte_client_dgm1,
+				liste_du_materiel,
+				type_d_intervention,
+			} = body.data.fields;
+
+			//If there is no products skip
+			if (liste_du_materiel.value.length < 1) return;
+
+			// Array of All Form Products, Needed Info only
+			let productList = liste_du_materiel.value.map((product) => ({
+				product: product.n_de_serie.value, // Account Number, to get ID
+				account: n_compte_client_dgm1.value, // Account Number, to get ID
+				dateinservice: date_debut_d_intervention.value,
+				datesold: date_debut_d_intervention.value,
+				cf_assets_propritaire: type_d_intervention.value,
+				assetname: product.nom_du_materiel_.value,
+				serialnumber: product.n_de_serie.value,
+				cf_assets_fournisseurs: "11x522437",
+				cf_assets_nfacturefournisseur: "xxxxx",
+			}));
+			productList.forEach((product) => getAccountId(product));
 		} else {
 			console.log(error);
 		}
@@ -74,7 +177,26 @@ const getFormResponse = (formId, responseId) => {
 	request(options, callback);
 };
 
-//setInterval(AddProductToClient, fiveMinutes);
+const getProductId = (productList, account) => {
+	let accoundId = account[0].id;
+	// GET Product ID
+	let query = writeQuerry(productList);
+	connection
+		.login()
+		.then(() => connection.query(query))
+		.then((productId) => {
+			console.log(productId);
+			/* productId = productId[0].id;
+			product = {
+				...product,
+				product: productId,
+				account: accoundId,
+			};
+			sendproduct(product); */
+		});
+};
+
+setInterval(AddCommentToAccount, CommentTimeInterval);
 
 /* UPDATING KIZEO LIST
 	1- Receive request with Id of updated/created Record.
