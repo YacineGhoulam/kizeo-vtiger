@@ -43,14 +43,14 @@ const writeQuerry = (productList) => {
 	1- Get a list from Kizeo of filled forms in last 10min
 	2- Extract 
 */
-const CommentTimeInterval = 1000 * 60 * 10; // 10 minutes
+const CommentTimeInterval = 1000 * 60 * 5; // 10 minutes
 
 const AddCommentToAccount = (formId = 782857) => {
 	const options = {
 		url: `${API_URL}/forms/${formId}/data/all`,
 		headers: API_HEADER,
 	};
-
+	console.log("Getting last reponses...");
 	function callback(error, response, body) {
 		if (!error && response.statusCode == 200) {
 			body = JSON.parse(body);
