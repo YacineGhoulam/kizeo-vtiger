@@ -4,6 +4,7 @@ const request = require("request");
 const bodyParser = require("body-parser");
 const axios = require("axios");
 const fs = require("fs");
+let minify = require("url-minify");
 
 app.use(bodyParser.json());
 
@@ -38,12 +39,14 @@ const writeQuerry = (productList) => {
 	return query + ";";
 };
 
-/* CREATING NEW CASES FOR EACH FORM
-	Every 10min we:
-	1- Get a list from Kizeo of filled forms in last 10min
-	2- Extract 
+/* CREATING NEW COMMENT FOR EACH RESONSE
+	Every 5min we:
+	1- Get a list from Kizeo of filled forms in last 5min
+	2- Extract data from each response
+	3- Get correspondent Account Id
+	4- Formulate and Set Comment to the Account
 */
-const CommentTimeInterval = 1000 * 60 * 5; // 10 minutes
+const CommentTimeInterval = 1000 * 60 * 10; // 10 minutes
 
 const AddCommentToAccount = (formId = 782857) => {
 	const options = {
@@ -100,11 +103,11 @@ const getAccountId = (responseData) => {
 		`/query?query=SELECT id FROM Accounts WHERE account_no='${account_no}';`;
 	axios.get(url, vtigerHeader).then((response) => {
 		let accountId = response.data.result[0].id;
-		setAccountComment(responseData, accountId);
+		formatComment(responseData, accountId);
 	});
 };
 
-const setAccountComment = (responseData, accountId) => {
+const formatComment = (responseData, accountId) => {
 	let {
 		personne_presente_sur_site_firstname,
 		personne_presente_sur_site_lastname,
@@ -118,12 +121,53 @@ const setAccountComment = (responseData, accountId) => {
 		? lieu_d_intervention_address.value
 		: adresse.value;
 
-	const commentcontent = `Une intervention ${type_d_intervention.value} a été réalisée par ${personne_presente_sur_site_firstname.value} ${personne_presente_sur_site_lastname.value} le ${date_debut_d_intervention.value} à ${heure_debut_intervention.value} sur le site ${adresse}`;
+	let commentcontent = `Une intervention ${type_d_intervention.value} a été réalisée par ${personne_presente_sur_site_firstname.value} ${personne_presente_sur_site_lastname.value} le ${date_debut_d_intervention.value} à ${heure_debut_intervention.value} sur le site ${adresse}.`;
+
 	const comment = {
 		commentcontent: commentcontent,
 		assigned_user_id: "19x141",
 		related_to: accountId,
 	};
+	caseExist(responseData, comment);
+};
+
+const caseExist = (responseData, comment) => {
+	let ticketNum = responseData.n_ticket_digimium.value;
+	if (ticketNum !== "") {
+		const ticketUrl = `https://digimium2.od2.vtiger.com/view/list?module=Cases&filterid=54&q=[[["case_no","contain",["${ticketNum}"]]]]`;
+		minify.default(ticketUrl).then((url) => {
+			comment.commentcontent += ` <br/> Il s’agissait d’une intervention dans le cadre du ticket <a href="${url.shortUrl}">${ticketNum}</a> <br/>`;
+			productListExist(responseData, comment);
+		});
+	}
+};
+
+const productListExist = (responseData, comment) => {
+	let products = responseData.liste_du_materiel.value;
+	if (products.length > 0) {
+		let productComment =
+			"Le matériel suivant a été installé lors de cette intervention : <br/> <ul>";
+		let productName = "";
+		products.forEach((item) => {
+			switch (item.choix1.value) {
+				case "Catalogue Digimium":
+					productName = item.nom_du_materiel_.value;
+					break;
+				case "Autres":
+					productName = item.autre_produit.value;
+					break;
+				default:
+					break;
+			}
+			productComment += `<li> ${productName} - Num Serie: ${item.num_serie.value} - Code Barre: ${item.code_barres1.value} </li> `;
+		});
+		productComment += "</ul>";
+		comment.commentcontent += productComment;
+	}
+	setAccountComment(comment);
+};
+
+const setAccountComment = (comment) => {
 	let url = encodeURI(
 		vtigerBaseUrl +
 			`/create?elementType=ModComments&element=${JSON.stringify(
@@ -199,7 +243,7 @@ const getProductId = (productList, account) => {
 			sendproduct(product); */
 		});
 };
-
+AddCommentToAccount();
 setInterval(AddCommentToAccount, CommentTimeInterval);
 
 /* UPDATING KIZEO LIST
