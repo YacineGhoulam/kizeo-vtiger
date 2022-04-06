@@ -158,7 +158,7 @@ const productListExist = (responseData, comment) => {
 				default:
 					break;
 			}
-			productComment += `<li> ${productName} - Num Serie: ${item.num_serie.value} - Code Barre: ${item.code_barres1.value} </li> `;
+			productComment += `<li> ${productName} - Num Serie: ${item.num_serie.value} - Mac Adress: ${item.code_barres1.value} </li> `;
 		});
 		productComment += "</ul>";
 		comment.commentcontent += productComment;
