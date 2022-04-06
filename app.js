@@ -109,8 +109,7 @@ const getAccountId = (responseData) => {
 
 const formatComment = (responseData, accountId) => {
 	let {
-		personne_presente_sur_site_firstname,
-		personne_presente_sur_site_lastname,
+		nom_de_l_intervenant,
 		date_debut_d_intervention,
 		heure_debut_intervention,
 		type_d_intervention,
@@ -121,11 +120,11 @@ const formatComment = (responseData, accountId) => {
 		? lieu_d_intervention_address.value
 		: adresse.value;
 
-	let commentcontent = `Une intervention ${type_d_intervention.value} a été réalisée par ${personne_presente_sur_site_firstname.value} ${personne_presente_sur_site_lastname.value} le ${date_debut_d_intervention.value} à ${heure_debut_intervention.value} sur le site ${adresse}.`;
+	let commentcontent = `Une intervention ${type_d_intervention.value} a été réalisée par ${nom_de_l_intervenant.value} le ${date_debut_d_intervention.value} à ${heure_debut_intervention.value} sur le site ${adresse}.`;
 
 	const comment = {
 		commentcontent: commentcontent,
-		assigned_user_id: "19x141",
+		assigned_user_id: "19x10",
 		related_to: accountId,
 	};
 	caseExist(responseData, comment);
