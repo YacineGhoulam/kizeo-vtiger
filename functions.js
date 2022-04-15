@@ -287,7 +287,7 @@ const getAllRecords = (listId, recordId, recordType) => {
 				getLastAccount(items, listId, recordId);
 			if (recordType === "Products")
 				getLastProduct(items, listId, recordId);
-			if (recordType === "Stock")
+			if (recordType === "Stocks")
 				getLastStock(items, listId, recordId);
 		} else {
 			console.log(error);
@@ -359,7 +359,7 @@ const getLastStock = (items, listId, recordId) => {
 		)
 		.then((product) => {
 			let { productname, qtyinstock } = product[0];
-			let itemString = `${productname}|${productcode}`;
+			let itemString = `${productname}|${qtyinstock}`;
 
 			// If Item exists, remove it (modification)
 			items = items.filter((item) => !item.includes(productname));
@@ -384,7 +384,6 @@ const addRecord = (items, listId) => {
 	}
 	request.put(options, callback);
 };
-const test = () => console.log("hey");
 
 module.exports = {
 	getAllLists: getAllLists,

@@ -59,10 +59,9 @@ app.post("/kizeo/addProduct", (req, res) => {
 });
 
 app.post("/kizeo/addStock", (req, res) => {
-	if (req.body[0].id) {
+	if (req.body[0].id !== undefined) {
 		let id = req.body[0].id;
-		console.log(id);
-		//getAllLists(id, "Stock");
+		getAllLists(id, "Stocks");
 	}
 	res.sendStatus(200);
 });
