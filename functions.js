@@ -287,6 +287,8 @@ const getAllRecords = (listId, recordId, recordType) => {
 				getLastAccount(items, listId, recordId);
 			if (recordType === "Products")
 				getLastProduct(items, listId, recordId);
+			if (recordType === "Stock")
+				getLastStock(items, listId, recordId);
 		} else {
 			console.log(error);
 		}
@@ -342,6 +344,28 @@ const getLastProduct = (items, listId, recordId) => {
 			items.unshift(itemString);
 			addRecord(items, listId);
 			console.log("Kizeo Add Product");
+		});
+};
+
+const getLastStock = (items, listId, recordId) => {
+	connection
+		.login()
+		.then(() =>
+			connection.query(
+				"SELECT productname, qtyinstock FROM Products WHERE discontinued = 1 AND id='" +
+					recordId +
+					"';"
+			)
+		)
+		.then((product) => {
+			let { productname, qtyinstock } = product[0];
+			let itemString = `${productname}|${productcode}`;
+
+			// If Item exists, remove it (modification)
+			items = items.filter((item) => !item.includes(productname));
+			items.unshift(itemString);
+			addRecord(items, listId);
+			console.log("Kizeo Add Stock");
 		});
 };
 
