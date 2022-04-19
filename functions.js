@@ -336,8 +336,10 @@ const getLastProduct = (items, listId, recordId) => {
 			)
 		)
 		.then((product) => {
+			console.log("qtyinstock: ", qtyinstock);
 			let { productname, productcode, qtyinstock } = product[0];
 			let itemString = `${productname}|${productcode}|${qtyinstock}`;
+			console.log(itemString);
 
 			// If Item exists, remove it (modification)
 			items = items.filter((item) => !item.includes(productname));
