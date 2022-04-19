@@ -136,9 +136,9 @@ const caseExist = (responseData, comment) => {
 		const ticketUrl = `https://digimium2.od2.vtiger.com/view/list?module=Cases&filterid=54&q=[[["case_no","contain",["${ticketNum}"]]]]`;
 		minify.default(ticketUrl).then((url) => {
 			comment.commentcontent += ` <br/> Il s’agissait d’une intervention dans le cadre du ticket <a href="${url.shortUrl}">${ticketNum}</a> <br/>`;
-			productListExist(responseData, comment);
 		});
 	}
+	productListExist(responseData, comment);
 };
 
 const productListExist = (responseData, comment) => {
@@ -385,6 +385,14 @@ const addRecord = (items, listId) => {
 	}
 	request.put(options, callback);
 };
+
+/* CREATING NEW COMMENT FOR EACH RESONSE
+	Every 5min we:
+	1- Get a list from Kizeo of filled forms in last 5min
+	2- Extract data from each response
+	3- Get correspondent Account Id
+	4- Formulate and Set Comment to the Account
+*/
 
 module.exports = {
 	getAllLists: getAllLists,
