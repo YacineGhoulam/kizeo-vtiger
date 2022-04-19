@@ -330,14 +330,14 @@ const getLastProduct = (items, listId, recordId) => {
 		.login()
 		.then(() =>
 			connection.query(
-				"SELECT productname, productcode FROM Products WHERE discontinued = 1 AND id='" +
+				"SELECT productname, productcode, qtyinstock FROM Products WHERE discontinued = 1 AND id='" +
 					recordId +
 					"';"
 			)
 		)
 		.then((product) => {
-			let { productname, productcode } = product[0];
-			let itemString = `${productname}|${productcode}`;
+			let { productname, productcode, qtyinstock } = product[0];
+			let itemString = `${productname}|${productcode}|${qtyinstock}`;
 
 			// If Item exists, remove it (modification)
 			items = items.filter((item) => !item.includes(productname));
@@ -347,7 +347,7 @@ const getLastProduct = (items, listId, recordId) => {
 		});
 };
 
-const getLastStock = (items, listId, recordId) => {
+/*const getLastStock = (items, listId, recordId) => {
 	connection
 		.login()
 		.then(() =>
@@ -367,7 +367,7 @@ const getLastStock = (items, listId, recordId) => {
 			addRecord(items, listId);
 			console.log("Kizeo Add Stock");
 		});
-};
+};*/
 
 const addRecord = (items, listId) => {
 	const options = {
