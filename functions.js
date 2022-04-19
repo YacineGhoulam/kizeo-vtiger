@@ -36,7 +36,7 @@ const writeQuerry = (productList) => {
 	return query + ";";
 };
 
-const CommentTimeInterval = 1000 * 60 * 3; // 10 minutes
+const CommentTimeInterval = 1000 * 60 * 10; // 10 minutes
 
 /* CREATING NEW COMMENT FOR EACH RESONSE
 	Every 5min we:
@@ -124,7 +124,7 @@ const formatComment = (responseData, accountId) => {
 
 	const comment = {
 		commentcontent: commentcontent,
-		assigned_user_id: "19x141",
+		assigned_user_id: "19x10",
 		related_to: accountId,
 	};
 	caseExist(responseData, comment);
