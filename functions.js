@@ -336,8 +336,8 @@ const getLastProduct = (items, listId, recordId) => {
 			)
 		)
 		.then((product) => {
-			console.log("qtyinstock: ", qtyinstock);
 			let { productname, productcode, qtyinstock } = product[0];
+			console.log("qtyinstock: ", qtyinstock);
 			let itemString = `${productname}|${productcode}|${qtyinstock}`;
 			console.log(itemString);
 
