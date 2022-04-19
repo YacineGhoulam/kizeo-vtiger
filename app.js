@@ -36,6 +36,8 @@ app.use(bodyParser.json());
 
 setInterval(AddCommentToAccount, CommentTimeInterval);
 
+//AddCommentToAccount(798903);
+
 // REQUESTS ROUTES
 
 app.get("/kizeo", (req, res) => {

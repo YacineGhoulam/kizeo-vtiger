@@ -36,10 +36,10 @@ const writeQuerry = (productList) => {
 	return query + ";";
 };
 
-const CommentTimeInterval = 1000 * 60 * 10; // 10 minutes
+const CommentTimeInterval = 1000 * 60 * 10000; // 10 minutes
 
 /* CREATING NEW COMMENT FOR EACH RESONSE
-	Every 5min we:
+	Every 10min we:
 	1- Get a list from Kizeo of filled forms in last 5min
 	2- Extract data from each response
 	3- Get correspondent Account Id
@@ -63,11 +63,10 @@ const AddCommentToAccount = (formId = 782857) => {
 				).getTime();
 				return currentDate - responseDate < CommentTimeInterval;
 			});
-
 			// TREAT EVERY RESPONSE
-			recentResponses.forEach((response) =>
-				getResponseData(response)
-			);
+			recentResponses.forEach((response) => {
+				getResponseData(response);
+			});
 		} else {
 			console.log(error);
 		}
@@ -87,7 +86,12 @@ const getResponseData = (response) => {
 		if (!error && response.statusCode == 200) {
 			body = JSON.parse(body);
 			let responseData = body.data.fields;
-			getAccountId(responseData);
+			if (form_id == 782857) getAccountId(responseData);
+			else if (form_id == 798903) {
+				responseData.produits.value.forEach((produit) =>
+					getAccountId(produit, form_id)
+				);
+			}
 		} else {
 			console.log(error);
 		}
@@ -95,14 +99,19 @@ const getResponseData = (response) => {
 	request(options, callback);
 };
 
-const getAccountId = (responseData) => {
-	let account_no = responseData.n_compte_client_dgm1.value;
+const getAccountId = (responseData, form_id) => {
+	console.log(responseData);
+	let account_no = "";
+	if (form_id == 798903) account_no = responseData.num_du_compte1.value;
+	else if (form_id == 782857)
+		account_no = responseData.n_compte_client_dgm1.value;
 	let url =
 		vtigerBaseUrl +
 		`/query?query=SELECT id FROM Accounts WHERE account_no='${account_no}';`;
 	axios.get(url, vtigerHeader).then((response) => {
 		let accountId = response.data.result[0].id;
 		formatComment(responseData, accountId);
+		// YOU STOPPED HERE BABE
 	});
 };
 
@@ -115,12 +124,13 @@ const formatComment = (responseData, accountId) => {
 		type_d_intervention,
 		lieu_d_intervention_address,
 		adresse,
+		nom_de_l_intervenant,
 	} = responseData;
 	adresse = lieu_d_intervention_address.value
 		? lieu_d_intervention_address.value
 		: adresse.value;
 
-	let commentcontent = `Une intervention ${type_d_intervention.value} a été réalisée par ${personne_presente_sur_site_firstname.value} ${personne_presente_sur_site_lastname.value} le ${date_debut_d_intervention.value} à ${heure_debut_intervention.value} sur le site ${adresse}.`;
+	let commentcontent = `Une intervention ${type_d_intervention.value} a été réalisée par ${nom_de_l_intervenant} en présence de ${personne_presente_sur_site_firstname.value} ${personne_presente_sur_site_lastname.value} le ${date_debut_d_intervention.value} à ${heure_debut_intervention.value} sur le site ${adresse}.`;
 
 	const comment = {
 		commentcontent: commentcontent,
