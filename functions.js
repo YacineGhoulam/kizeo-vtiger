@@ -100,7 +100,6 @@ const getResponseData = (response) => {
 };
 
 const getAccountId = (responseData, form_id) => {
-	console.log(responseData);
 	let account_no = "";
 	if (form_id == 798903) account_no = responseData.num_du_compte1.value;
 	else if (form_id == 782857)
@@ -110,8 +109,8 @@ const getAccountId = (responseData, form_id) => {
 		`/query?query=SELECT id FROM Accounts WHERE account_no='${account_no}';`;
 	axios.get(url, vtigerHeader).then((response) => {
 		let accountId = response.data.result[0].id;
-		formatComment(responseData, accountId);
-		// YOU STOPPED HERE BABE
+		if (form_id == 798903) getProductId(responseData, accountId);
+		else if (form_id == 782857) formatComment(responseData, accountId);
 	});
 };
 
@@ -190,67 +189,6 @@ const setAccountComment = (comment) => {
 				response.data.result.commentcontent
 		)
 	);
-};
-
-// USELESSSSSSSSSSSSSSSSSSSSSSSSSS
-const getFormProducts = (formId, responseId) => {
-	const options = {
-		url: `${API_URL}/forms/${formId}/data/${responseId}`,
-		headers: API_HEADER,
-	};
-
-	function callback(error, response, body) {
-		if (!error && response.statusCode == 200) {
-			body = JSON.parse(body);
-
-			//Extract info from form
-			const {
-				date_debut_d_intervention,
-				n_compte_client_dgm1,
-				liste_du_materiel,
-				type_d_intervention,
-			} = body.data.fields;
-
-			//If there is no products skip
-			if (liste_du_materiel.value.length < 1) return;
-
-			// Array of All Form Products, Needed Info only
-			let productList = liste_du_materiel.value.map((product) => ({
-				product: product.n_de_serie.value, // Account Number, to get ID
-				account: n_compte_client_dgm1.value, // Account Number, to get ID
-				dateinservice: date_debut_d_intervention.value,
-				datesold: date_debut_d_intervention.value,
-				cf_assets_propritaire: type_d_intervention.value,
-				assetname: product.nom_du_materiel_.value,
-				serialnumber: product.n_de_serie.value,
-				cf_assets_fournisseurs: "11x522437",
-				cf_assets_nfacturefournisseur: "xxxxx",
-			}));
-			productList.forEach((product) => getAccountId(product));
-		} else {
-			console.log(error);
-		}
-	}
-	request(options, callback);
-};
-
-const getProductId = (productList, account) => {
-	let accoundId = account[0].id;
-	// GET Product ID
-	let query = writeQuerry(productList);
-	connection
-		.login()
-		.then(() => connection.query(query))
-		.then((productId) => {
-			console.log(productId);
-			/* productId = productId[0].id;
-			product = {
-				...product,
-				product: productId,
-				account: accoundId,
-			};
-			sendproduct(product); */
-		});
 };
 
 /* UPDATING KIZEO LIST
@@ -403,6 +341,74 @@ const addRecord = (items, listId) => {
 	3- Get correspondent Account Id
 	4- Formulate and Set Comment to the Account
 */
+
+const getProductId = (responseData, accountId) => {
+	let productRef = responseData.reference1.value;
+	let url =
+		vtigerBaseUrl +
+		`/query?query=SELECT id FROM Products WHERE vendor_part_no='${productRef}';`;
+	axios.get(url, vtigerHeader).then((response) => {
+		responseData.prodcutId = response.data.result[0].id;
+		responseData.accountId = accountId;
+		getFormProducts(responseData);
+	});
+};
+
+const getFormProducts = (responseData) => {
+	const options = {
+		url: "https://jsonplaceholder.typicode.com/todos/1",
+		headers: API_HEADER,
+	};
+
+	function callback(error, response, body) {
+		if (!error && response.statusCode == 200) {
+			body = JSON.parse(body);
+
+			//Extract info from form
+			const {
+				prodcutId,
+				accountId,
+				nom_du_produit,
+				reference1,
+				qt_produit,
+				qt_recu,
+				date_de_reception,
+				lieu_de_reception,
+				num_du_compte1,
+				serial_number,
+				adresse_mac,
+			} = responseData;
+
+			// Needed Info only
+			let product = {
+				product: prodcutId, // Done
+				account: accountId, // Done
+				dateinservice: date_de_reception.value, //Done
+				datesold: date_de_reception.value, //Done
+				cf_assets_propritaire: "STOCK", //Done
+				assetname: nom_du_produit.value, //Done
+				serialnumber: serial_number.value, //Done
+				cf_assets_adressemac: adresse_mac.value, //Done
+				cf_assets_fournisseurs: "11x5586", //Done
+				cf_assets_nfacturefournisseur: "xxxxx",
+				assigned_user_id: "20x47",
+			};
+
+			let url =
+				vtigerBaseUrl +
+				`/create?elementType=Assets&element=${JSON.stringify(
+					product
+				)}`;
+
+			axios.post(url, {}, vtigerHeader).then((response) =>
+				console.log("Asset has been Added. ")
+			);
+		} else {
+			console.log(error);
+		}
+	}
+	request(options, callback);
+};
 
 module.exports = {
 	getAllLists: getAllLists,

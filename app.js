@@ -36,7 +36,7 @@ app.use(bodyParser.json());
 
 setInterval(AddCommentToAccount, CommentTimeInterval);
 
-//AddCommentToAccount(798903);
+AddCommentToAccount(798903);
 
 // REQUESTS ROUTES
 
