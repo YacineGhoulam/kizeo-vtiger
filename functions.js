@@ -343,10 +343,10 @@ const addRecord = (items, listId) => {
 */
 
 const getProductId = (responseData, accountId) => {
-	let productRef = responseData.reference1.value;
+	let productName = responseData.nom_du_produit.value;
 	let url =
 		vtigerBaseUrl +
-		`/query?query=SELECT id FROM Products WHERE vendor_part_no='${productRef}';`;
+		`/query?query=SELECT id FROM Products WHERE productname='${productName}';`;
 	axios.get(url, vtigerHeader).then((response) => {
 		responseData.prodcutId = response.data.result[0].id;
 		responseData.accountId = accountId;
@@ -355,59 +355,65 @@ const getProductId = (responseData, accountId) => {
 };
 
 const getFormProducts = (responseData) => {
-	const options = {
-		url: "https://jsonplaceholder.typicode.com/todos/1",
-		headers: API_HEADER,
+	//Extract info from form
+	const {
+		prodcutId,
+		accountId,
+		nom_du_produit,
+		reference1,
+		qt_produit,
+		qt_recu,
+		date_de_reception,
+		lieu_de_reception,
+		num_du_compte1,
+		serial_number,
+		adresse_mac,
+	} = responseData;
+
+	// Needed Info only
+	let product = {
+		product: prodcutId, // Done
+		account: accountId, // Done
+		dateinservice: date_de_reception.value, //Done
+		datesold: date_de_reception.value, //Done
+		cf_assets_propritaire: "STOCK", //Done
+		assetname: nom_du_produit.value, //Done
+		serialnumber: serial_number.value, //Done
+		cf_assets_adressemac: adresse_mac.value, //Done
+		cf_assets_fournisseurs: "11x5586", //Done
+		cf_assets_nfacturefournisseur: "xxxxx",
+		assigned_user_id: "20x47",
 	};
 
-	function callback(error, response, body) {
-		if (!error && response.statusCode == 200) {
-			body = JSON.parse(body);
+	let url =
+		vtigerBaseUrl +
+		`/create?elementType=Assets&element=${JSON.stringify(product)}`;
 
-			//Extract info from form
-			const {
-				prodcutId,
-				accountId,
-				nom_du_produit,
-				reference1,
-				qt_produit,
-				qt_recu,
-				date_de_reception,
-				lieu_de_reception,
-				num_du_compte1,
-				serial_number,
-				adresse_mac,
-			} = responseData;
+	axios.post(url, {}, vtigerHeader).then((response) => {
+		console.log("Asset has been Added.");
+		addProductStock(responseData);
+	});
+};
 
-			// Needed Info only
-			let product = {
-				product: prodcutId, // Done
-				account: accountId, // Done
-				dateinservice: date_de_reception.value, //Done
-				datesold: date_de_reception.value, //Done
-				cf_assets_propritaire: "STOCK", //Done
-				assetname: nom_du_produit.value, //Done
-				serialnumber: serial_number.value, //Done
-				cf_assets_adressemac: adresse_mac.value, //Done
-				cf_assets_fournisseurs: "11x5586", //Done
-				cf_assets_nfacturefournisseur: "xxxxx",
-				assigned_user_id: "20x47",
-			};
+const addProductStock = (responseData) => {
+	//Extract info from form
+	const { prodcutId } = responseData;
 
-			let url =
-				vtigerBaseUrl +
-				`/create?elementType=Assets&element=${JSON.stringify(
-					product
-				)}`;
+	let url = vtigerBaseUrl + `/retrieve?id=${prodcutId}`;
 
-			axios.post(url, {}, vtigerHeader).then((response) =>
-				console.log("Asset has been Added. ")
-			);
-		} else {
-			console.log(error);
-		}
-	}
-	request(options, callback);
+	axios.get(url, vtigerHeader).then((response) => {
+		const vendor_id = response.data.result.vendor_id;
+		const qtyinstock = response.data.result.qtyinstock;
+		const product = {
+			id: prodcutId,
+			vendor_id: vendor_id,
+			qtyinstock: (parseInt(qtyinstock) + 1).toString(),
+		};
+		url = vtigerBaseUrl + `/revise?element=${JSON.stringify(product)}`;
+		axios.post(url, {}, vtigerHeader).then((response) => {
+			console.log("Product Stock has been Added.");
+		});
+	});
 };
 
 module.exports = {
