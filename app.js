@@ -17,6 +17,8 @@ setInterval(() => {
 	AddCommentToAccount(798903);
 }, AssetsTimeInterval);
 
+AddCommentToAccount(782857);
+
 // REQUESTS ROUTES
 
 app.get("/kizeo", (req, res) => {

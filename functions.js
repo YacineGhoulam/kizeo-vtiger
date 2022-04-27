@@ -36,7 +36,7 @@ const writeQuerry = (productList) => {
 	return query + ";";
 };
 
-const CommentTimeInterval = 1000 * 60 * 7; // 7 minutes
+const CommentTimeInterval = 1000 * 60 * 100; // 7 minutes
 const AssetsTimeInterval = 1000 * 60 * 7.5; // 7.5 minutes
 
 /* CREATING NEW COMMENT FOR EACH RESONSE
@@ -96,7 +96,7 @@ const getResponseData = (response) => {
 		if (!error && response.statusCode == 200) {
 			body = JSON.parse(body);
 			let responseData = body.data.fields;
-			if (form_id == 782857) getAccountId(responseData);
+			if (form_id == 782857) getAccountId(responseData, form_id);
 			else if (form_id == 798903) {
 				responseData.produits.value.forEach((produit) => {
 					getAccountId(produit, form_id);
@@ -117,11 +117,22 @@ const getAccountId = (responseData, form_id) => {
 	let url =
 		vtigerBaseUrl +
 		`/query?query=SELECT id FROM Accounts WHERE account_no='${account_no}';`;
-	axios.get(url, vtigerHeader).then((response) => {
-		let accountId = response.data.result[0].id;
-		if (form_id == 798903) getProductId(responseData, accountId);
-		else if (form_id == 782857) formatComment(responseData, accountId);
-	});
+	console.log(form_id);
+	axios.get(url, vtigerHeader)
+		.then((response) => {
+			let accountId = response.data.result[0].id;
+			if (form_id == 798903) getProductId(responseData, accountId);
+			else if (form_id == 782857)
+				formatComment(responseData, accountId);
+		})
+		.catch(function (error) {
+			if (error.response) {
+				// Request made and server responded
+				console.log(error.response.data);
+				console.log(error.response.status);
+				console.log(error.response.headers);
+			}
+		});
 };
 
 const formatComment = (responseData, accountId) => {
@@ -139,7 +150,7 @@ const formatComment = (responseData, accountId) => {
 		? lieu_d_intervention_address.value
 		: adresse.value;
 
-	let commentcontent = `Une intervention ${type_d_intervention.value} a été réalisée par ${nom_de_l_intervenant} en présence de ${personne_presente_sur_site_firstname.value} ${personne_presente_sur_site_lastname.value} le ${date_debut_d_intervention.value} à ${heure_debut_intervention.value} sur le site ${adresse}.`;
+	let commentcontent = `Une intervention ${type_d_intervention.value} a été réalisée par ${nom_de_l_intervenant.value} en présence de ${personne_presente_sur_site_firstname.value} ${personne_presente_sur_site_lastname.value} le ${date_debut_d_intervention.value} à ${heure_debut_intervention.value} sur le site ${adresse}.`;
 
 	const comment = {
 		commentcontent: commentcontent,
