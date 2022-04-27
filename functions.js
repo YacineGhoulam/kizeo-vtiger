@@ -36,7 +36,7 @@ const writeQuerry = (productList) => {
 	return query + ";";
 };
 
-const CommentTimeInterval = 1000 * 60 * 100; // 7 minutes
+const CommentTimeInterval = 1000 * 60 * 7; // 7 minutes
 const AssetsTimeInterval = 1000 * 60 * 7.5; // 7.5 minutes
 
 /* CREATING NEW COMMENT FOR EACH RESONSE
@@ -117,7 +117,6 @@ const getAccountId = (responseData, form_id) => {
 	let url =
 		vtigerBaseUrl +
 		`/query?query=SELECT id FROM Accounts WHERE account_no='${account_no}';`;
-	console.log(form_id);
 	axios.get(url, vtigerHeader)
 		.then((response) => {
 			let accountId = response.data.result[0].id;
