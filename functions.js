@@ -62,7 +62,16 @@ const AddCommentToAccount = (formId = 782857) => {
 				let responseDate = new Date(
 					response.create_time
 				).getTime();
-				return currentDate - responseDate < CommentTimeInterval;
+				if (form_id == 782857)
+					return (
+						currentDate - responseDate <
+						CommentTimeInterval
+					);
+				else if (form_id == 798903)
+					return (
+						currentDate - responseDate <
+						AssetsTimeInterval
+					);
 			});
 			// TREAT EVERY RESPONSE
 			recentResponses.forEach((response) => {
