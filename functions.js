@@ -37,7 +37,7 @@ const writeQuerry = (productList) => {
 };
 
 const CommentTimeInterval = 1000 * 60 * 7; // 7 minutes
-const AssetsTimeInterval = 1000 * 60 * 7.5; // 7.5 minutes
+const AssetsTimeInterval = 1000 * 60 * 1000; // 7.5 minutes
 
 /* CREATING NEW COMMENT FOR EACH RESONSE
 	Every 10min we:
@@ -98,7 +98,12 @@ const getResponseData = (response) => {
 			let responseData = body.data.fields;
 			if (form_id == 782857) getAccountId(responseData, form_id);
 			else if (form_id == 798903) {
+				formatProductsComment(responseData);
 				responseData.produits.value.forEach((produit) => {
+					produit.num_du_compte1 =
+						responseData.num_du_compte;
+					produit.date_de_reception =
+						responseData.date_de_reception1;
 					getAccountId(produit, form_id);
 				});
 			}
@@ -414,25 +419,25 @@ const getFormProducts = (responseData) => {
 	});
 };
 
-const addProductStock = (responseData) => {
-	//Extract info from form
-	const { prodcutId } = responseData;
-
-	let url = vtigerBaseUrl + `/retrieve?id=${prodcutId}`;
-
-	axios.get(url, vtigerHeader).then((response) => {
-		const vendor_id = response.data.result.vendor_id;
-		const qtyinstock = response.data.result.qtyinstock;
-		const product = {
-			id: prodcutId,
-			vendor_id: vendor_id,
-			qtyinstock: (parseInt(qtyinstock) + 1).toString(),
-		};
-		url = vtigerBaseUrl + `/revise?element=${JSON.stringify(product)}`;
-		axios.post(url, {}, vtigerHeader).then((response) => {
-			console.log("Product Stock has been Added.");
-		});
+const formatProductsComment = (responseData) => {
+	const {
+		lieu_de_reception1,
+		num_du_compte,
+		date_de_reception1,
+		produits,
+	} = responseData;
+	let commentcontent = `Produits scannés le ${date_de_reception1.value} pour le siège ${lieu_de_reception1.value} <br>`;
+	// YOU STOPED HERE
+	responseData.produits.value.forEach((produit) => {
+		console.log(produit);
 	});
+	console.log(commentcontent);
+	const comment = {
+		commentcontent: commentcontent,
+		assigned_user_id: "19x10",
+		//related_to: accountId,
+	};
+	//caseExist(responseData, comment);
 };
 
 module.exports = {

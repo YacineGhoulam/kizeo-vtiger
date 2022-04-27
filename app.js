@@ -17,7 +17,7 @@ setInterval(() => {
 	AddCommentToAccount(798903);
 }, AssetsTimeInterval);
 
-AddCommentToAccount(782857);
+AddCommentToAccount(798903);
 
 // REQUESTS ROUTES
 
