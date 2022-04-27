@@ -36,7 +36,8 @@ const writeQuerry = (productList) => {
 	return query + ";";
 };
 
-const CommentTimeInterval = 1000 * 60 * 10000; // 10 minutes
+const CommentTimeInterval = 1000 * 60 * 7; // 7 minutes
+const AssetsTimeInterval = 1000 * 60 * 7.5; // 7.5 minutes
 
 /* CREATING NEW COMMENT FOR EACH RESONSE
 	Every 10min we:
@@ -88,9 +89,9 @@ const getResponseData = (response) => {
 			let responseData = body.data.fields;
 			if (form_id == 782857) getAccountId(responseData);
 			else if (form_id == 798903) {
-				responseData.produits.value.forEach((produit) =>
-					getAccountId(produit, form_id)
-				);
+				responseData.produits.value.forEach((produit) => {
+					getAccountId(produit, form_id);
+				});
 			}
 		} else {
 			console.log(error);
@@ -362,7 +363,6 @@ const getFormProducts = (responseData) => {
 		nom_du_produit,
 		reference1,
 		qt_produit,
-		qt_recu,
 		date_de_reception,
 		lieu_de_reception,
 		num_du_compte1,
@@ -391,7 +391,7 @@ const getFormProducts = (responseData) => {
 
 	axios.post(url, {}, vtigerHeader).then((response) => {
 		console.log("Asset has been Added.");
-		addProductStock(responseData);
+		//addProductStock(responseData);
 	});
 };
 
@@ -420,4 +420,5 @@ module.exports = {
 	getAllLists: getAllLists,
 	AddCommentToAccount: AddCommentToAccount,
 	CommentTimeInterval: CommentTimeInterval,
+	AssetsTimeInterval: AssetsTimeInterval,
 };

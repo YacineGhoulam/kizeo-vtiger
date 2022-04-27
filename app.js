@@ -1,42 +1,21 @@
 const app = require("express")();
-const CRM = require("vtiger");
-const request = require("request");
 const bodyParser = require("body-parser");
-const axios = require("axios");
-const minify = require("url-minify");
 const {
 	getAllLists,
 	AddCommentToAccount,
 	CommentTimeInterval,
+	AssetsTimeInterval,
 } = require("./functions");
-
-let connection = new CRM.Connection(
-	"https://digimium2.od2.vtiger.com",
-	"yacine@digimium.fr",
-	"Kn5kbakmLT3UDZWE"
-);
-const vtigerBaseUrl =
-	"https://digimium2.od2.vtiger.com/restapi/v1/vtiger/default";
-
-const vtigerHeader = {
-	auth: {
-		username: "yacine@digimium.fr",
-		password: "Kn5kbakmLT3UDZWE",
-	},
-};
-
-const API_URL = "https://www.kizeoforms.com/rest/v3";
-const API_TOKEN =
-	"chouba_at_digimiumfr_b72c80226c3d92558e77afe8456ac6f71c52cae7";
-const API_HEADER = {
-	Authorization: API_TOKEN,
-};
 
 app.use(bodyParser.json());
 
-setInterval(AddCommentToAccount, CommentTimeInterval);
+setInterval(() => {
+	AddCommentToAccount(782857);
+}, CommentTimeInterval);
 
-AddCommentToAccount(798903);
+setInterval(() => {
+	AddCommentToAccount(798903);
+}, AssetsTimeInterval);
 
 // REQUESTS ROUTES
 
